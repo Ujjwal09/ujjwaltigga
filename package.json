@@ -1,0 +1,14 @@
+{
+  "name": "timegrid",
+  "version": "0.1.0",
+  "description": "Minimalist floating time-tracker overlay — 30-minute slots per day, with history and analytics.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "ELECTRON_RUN_AS_NODE= electron ."
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^32.0.0"
+  }
+}

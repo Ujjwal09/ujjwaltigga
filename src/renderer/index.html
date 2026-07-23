@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TimeGrid</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="panel">
+    <div class="bar">
+      <span class="dot"></span>
+      <div class="nav">
+        <button class="icon-btn" id="prev" title="Previous day">‹</button>
+        <span class="date" id="date">—</span>
+        <span class="today-tag" id="todayTag">today</span>
+        <button class="icon-btn" id="next" title="Next day">›</button>
+      </div>
+      <span class="count"><b id="c-done">0</b>/48</span>
+      <button class="icon-btn" id="pin" title="Always on top">📌</button>
+      <button class="icon-btn" id="min" title="Minimize">–</button>
+      <button class="icon-btn" id="close" title="Close">×</button>
+    </div>
+    <div class="meter"><i id="meter"></i></div>
+    <div class="grid" id="grid"></div>
+    <div class="tools">
+      <div class="seg" id="collapseSeg">
+        <button data-v="0" class="on">Full day</button>
+        <button data-v="1">Collapse</button>
+      </div>
+      <span class="spacer"></span>
+      <button class="link" id="statsBtn">Analytics ↗</button>
+      <span id="pct">0%</span>
+    </div>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
