@@ -5,15 +5,25 @@ const el = id => document.getElementById(id);
 
 function dayAgo(n) { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - n); return d; }
 
+const GOAL_TIERS = [10, 24, 50, 100];
+
+function topicColor(topic) {
+  if (!topic) return null;
+  let h = 0;
+  for (let i = 0; i < topic.length; i++) h = (h * 31 + topic.charCodeAt(i)) % 360;
+  return `hsl(${h} 62% 58%)`;
+}
+
 (async () => {
   const all = await window.tg.getAll();
-  const countOf = k => (all[k] || []).length;
+  const slotsOf = k => Object.keys(all[k] || {});
+  const countOf = k => slotsOf(k).length;
 
   // ---- series: last 30 days (index 0 = today) ----
   const days30 = [];
   for (let i = 29; i >= 0; i--) { const d = dayAgo(i); days30.push({ d, key: keyOf(d), n: countOf(keyOf(d)) }); }
 
-  const active = Object.keys(all).filter(k => all[k].length);
+  const active = Object.keys(all).filter(k => countOf(k));
   el('sub').textContent = active.length
     ? `${active.length} day${active.length > 1 ? 's' : ''} tracked · earliest ${active.sort()[0]}`
     : 'No data yet — start ticking slots in the tracker.';
@@ -23,7 +33,6 @@ function dayAgo(n) { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.g
   const last7 = [...Array(7)].map((_, i) => countOf(keyOf(dayAgo(i))));
   const avg7 = Math.round(last7.reduce((a, b) => a + b, 0) / 7);
   const avg30 = Math.round(days30.reduce((a, b) => a + b.n, 0) / 30);
-  const best = Math.max(0, ...Object.values(all).map(v => v.length));
 
   // current streak: consecutive days (ending today or yesterday) with any utilisation
   let streak = 0;
@@ -44,14 +53,53 @@ function dayAgo(n) { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.g
   // ---- hour-of-day pattern: how often each hour's 2 slots are done, across all data ----
   const hourHits = Array(24).fill(0);
   const dayN = active.length || 1;
-  active.forEach(k => all[k].forEach(i => { hourHits[Math.floor(i / 2)]++; }));
+  active.forEach(k => slotsOf(k).forEach(i => { hourHits[Math.floor(Number(i) / 2)]++; }));
   const hourPct = hourHits.map(h => h / (dayN * 2)); // 0..1
   el('hours').innerHTML = svgBars(hourPct, [...Array(24).keys()],
     (h) => h % 3 === 0 ? pad(h) : '', 1, false);
 
+  // ---- topic goals: total hours per topic + progress to 10/24/50/100 ----
+  renderGoals(all);
+
   // ---- consistency heatmap: last 5 weeks (7 rows Sun..Sat? use columns=weeks) ----
   renderHeat(all);
 })();
+
+// Aggregate hours per topic (0.5h per slot) and render progress toward goal tiers.
+function renderGoals(all) {
+  const hours = {}; // topic -> hours
+  Object.values(all).forEach(day => Object.values(day).forEach(t => {
+    const name = t || '(untagged)';
+    hours[name] = (hours[name] || 0) + 0.5;
+  }));
+  const topics = Object.entries(hours).sort((a, b) => b[1] - a[1]);
+  const host = document.getElementById('goals');
+  if (!topics.length) { host.innerHTML = '<div class="empty">No topics yet — set a topic in the tracker, then tick slots.</div>'; return; }
+
+  const maxTier = GOAL_TIERS[GOAL_TIERS.length - 1];
+  host.innerHTML = topics.map(([name, h]) => {
+    const col = topicColor(name === '(untagged)' ? '' : name) || 'var(--accent)';
+    const next = GOAL_TIERS.find(t => h < t);
+    const tierLabel = next ? `${h} / ${next} h` : `${h} h — 100h reached 🎉`;
+    const width = Math.min(100, h / maxTier * 100);
+    const ticks = GOAL_TIERS.map(t =>
+      `<span class="${h >= t ? 'hit' : ''}" style="left:${t / maxTier * 100}%">${t}h</span>`).join('');
+    return `<div class="goal">
+      <div class="top">
+        <span class="swatch" style="background:${col}"></span>
+        <span class="name">${escapeHtml(name)}</span>
+        <span class="hrs"><b>${h}</b> h</span>
+        <span class="tier">${tierLabel}</span>
+      </div>
+      <div class="track"><i style="width:${width}%;background:${col}"></i></div>
+      <div class="ticks">${ticks}</div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
 
 // Generic SVG bar chart. vals scaled to `max`. labelFn(item,i)->string for x-axis.
 function svgBars(vals, items, labelFn, max, dimPast) {
@@ -87,9 +135,10 @@ function renderHeat(all) {
     for (let dow = 0; dow < 7; dow++) {
       const d = new Date(start); d.setDate(start.getDate() + w * 7 + dow);
       const future = d > today;
-      const p = future ? -1 : (all[keyOf(d)] || []).length / 48;
+      const n = Object.keys(all[keyOf(d)] || {}).length;
+      const p = future ? -1 : n / 48;
       const bg = future ? 'transparent' : shade(p);
-      const title = future ? '' : `${keyOf(d)} — ${(all[keyOf(d)] || []).length}/48`;
+      const title = future ? '' : `${keyOf(d)} — ${n}/48`;
       cells += `<div class="cell" style="background:${bg}" title="${title}"></div>`;
     }
     cols += `<div class="col">${cells}</div>`;

@@ -41,6 +41,8 @@ function openDashboard() {
 }
 
 app.whenReady().then(() => {
+  // Auto-start at login (only meaningful for the packaged app).
+  if (app.isPackaged) app.setLoginItemSettings({ openAtLogin: true });
   store.init(app.getPath('userData'));
   createPanel();
 

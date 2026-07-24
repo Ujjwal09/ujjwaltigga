@@ -21,6 +21,18 @@
       <button class="icon-btn" id="close" title="Close">×</button>
     </div>
     <div class="meter"><i id="meter"></i></div>
+    <div class="learnbox">
+      <div class="cap">
+        <span class="lbl">Learning</span>
+        <span class="slot none" id="selLabel">— select a cell —</span>
+      </div>
+      <div class="learnrow">
+        <input id="learn" list="topics" placeholder="Please enter a Topic" autocomplete="off" spellcheck="false" disabled>
+        <datalist id="topics"></datalist>
+        <button class="act no" id="cancel" title="Cancel change">✗</button>
+        <button class="act ok" id="confirm" title="Confirm change">✓</button>
+      </div>
+    </div>
     <div class="grid" id="grid"></div>
     <div class="tools">
       <div class="seg" id="collapseSeg">

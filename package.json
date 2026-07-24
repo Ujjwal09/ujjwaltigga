@@ -4,11 +4,28 @@
   "description": "Minimalist floating time-tracker overlay — 30-minute slots per day, with history and analytics.",
   "main": "src/main.js",
   "scripts": {
-    "start": "ELECTRON_RUN_AS_NODE= electron ."
+    "start": "ELECTRON_RUN_AS_NODE= electron .",
+    "dist": "ELECTRON_RUN_AS_NODE= electron-builder"
   },
   "author": "",
   "license": "MIT",
+  "build": {
+    "appId": "com.ujjwal.timegrid",
+    "productName": "TimeGrid",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "dir"
+      ],
+      "category": "public.app-category.productivity"
+    }
+  },
   "devDependencies": {
-    "electron": "^32.0.0"
+    "electron": "^32.0.0",
+    "electron-builder": "^25.1.8"
   }
 }
