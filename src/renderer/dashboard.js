@@ -39,16 +39,18 @@ function topicColor(topic) {
   for (let i = 0; i < 365; i++) { if (countOf(keyOf(dayAgo(i))) > 0) streak++; else if (i > 0) break; else break; }
 
   const pct = n => Math.round(n / TOTAL * 100);
+  const hrs = n => n / 2;   // slots -> hours (0.5h each)
   el('kpis').innerHTML = [
-    ['Today', `${today}<small>/48 · ${pct(today)}%</small>`, true],
-    ['7-day avg', `${avg7}<small>/48 · ${pct(avg7)}%</small>`, false],
-    ['30-day avg', `${avg30}<small>/48 · ${pct(avg30)}%</small>`, false],
+    ['Today', `${hrs(today)}<small> h · ${pct(today)}%</small>`, true],
+    ['7-day avg', `${hrs(avg7)}<small> h · ${pct(avg7)}%</small>`, false],
+    ['30-day avg', `${hrs(avg30)}<small> h · ${pct(avg30)}%</small>`, false],
     ['Current streak', `${streak}<small> day${streak === 1 ? '' : 's'}</small>`, true],
   ].map(([l, v, a]) => `<div class="kpi"><div class="v ${a ? 'accent' : ''}">${v}</div><div class="l">${l}</div></div>`).join('');
 
   // ---- 30-day trend (SVG bars) ----
   el('trend').innerHTML = svgBars(days30.map(x => x.n), days30.map(x => x.d),
-    (d, i) => (i % 5 === 0 || i === 29) ? `${d.getDate()}/${d.getMonth() + 1}` : '', TOTAL, true);
+    (d, i) => (i % 5 === 0 || i === 29) ? `${d.getDate()}/${d.getMonth() + 1}` : '', TOTAL, true,
+    v => v ? v / 2 : '');   // absolute hours above each bar
 
   // ---- hour-of-day pattern: how often each hour's 2 slots are done, across all data ----
   const hourHits = Array(24).fill(0);
@@ -102,23 +104,28 @@ function escapeHtml(s) {
 }
 
 // Generic SVG bar chart. vals scaled to `max`. labelFn(item,i)->string for x-axis.
-function svgBars(vals, items, labelFn, max, dimPast) {
+// valFmt(v,i)->string (optional) prints an absolute value above each bar.
+function svgBars(vals, items, labelFn, max, dimPast, valFmt) {
   if (!vals.length) return '<div class="empty">No data</div>';
-  const W = 560, H = 150, pb = 18, pl = 4;
+  const W = 560, H = 150, pb = 18, pt = 10, pl = 4;
   const n = vals.length, gap = 2;
   const bw = (W - pl) / n - gap;
   const chartH = H - pb;
-  let bars = '', labels = '';
+  let bars = '', labels = '', vlabels = '';
   vals.forEach((v, i) => {
-    const h = max > 0 ? (v / max) * (chartH - 6) : 0;
+    const h = max > 0 ? (v / max) * (chartH - pt) : 0;
     const x = pl + i * (bw + gap);
     const y = chartH - h;
     const dim = dimPast && i === n - 1 && v === 0;
     bars += `<rect class="bar ${dim ? 'dim' : ''}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, h).toFixed(1)}" rx="2"></rect>`;
     const lab = labelFn(items[i], i);
     if (lab) labels += `<text class="axis" x="${(x + bw / 2).toFixed(1)}" y="${H - 4}" text-anchor="middle">${lab}</text>`;
+    if (valFmt) {
+      const vl = valFmt(v, i);
+      if (vl !== '') vlabels += `<text class="vlabel" x="${(x + bw / 2).toFixed(1)}" y="${(y - 2.5).toFixed(1)}" text-anchor="middle">${vl}</text>`;
+    }
   });
-  return `<svg viewBox="0 0 ${W} ${H}">${bars}${labels}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}">${bars}${labels}${vlabels}</svg>`;
 }
 
 function renderHeat(all) {
@@ -138,7 +145,7 @@ function renderHeat(all) {
       const n = Object.keys(all[keyOf(d)] || {}).length;
       const p = future ? -1 : n / 48;
       const bg = future ? 'transparent' : shade(p);
-      const title = future ? '' : `${keyOf(d)} — ${n}/48`;
+      const title = future ? '' : `${keyOf(d)} — ${n / 2} h`;
       cells += `<div class="cell" style="background:${bg}" title="${title}"></div>`;
     }
     cols += `<div class="col">${cells}</div>`;

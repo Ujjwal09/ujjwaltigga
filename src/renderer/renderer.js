@@ -6,7 +6,7 @@ let viewDate = new Date(); viewDate.setHours(0, 0, 0, 0);
 const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
 
 let collapse = false;
-const foldState = { past: false, future: false };
+const expanded = new Set();        // ids of empty-hour groups the user expanded (collapse mode)
 let doneMap = {};                 // { slotIndex: "topic" }  — presence = utilised
 let selected = null;              // currently selected slot index (for the learning box)
 let scrolled = false;
@@ -73,18 +73,18 @@ function hourRow(h) {
   return row;
 }
 
-function foldRow(label, hoursArr, key) {
-  const done = hoursArr.reduce((n, h) => n + (isDone(h * 2) ? 1 : 0) + (isDone(h * 2 + 1) ? 1 : 0), 0);
-  const total = hoursArr.length * 2;
+const hourHasData = h => isDone(h * 2) || isDone(h * 2 + 1);
+
+// A fold row standing in for a run of empty hours [start..end); click to expand/collapse it.
+function emptyFoldRow(hoursArr, id) {
+  const open = expanded.has(id);
+  const from = `${pad(hoursArr[0])}:00`;
+  const to = `${pad(hoursArr[hoursArr.length - 1])}:30`;
   const el = document.createElement('div');
   el.className = 'fold';
-  let mini = '';
-  hoursArr.forEach(h => [h * 2, h * 2 + 1].forEach(i => {
-    const col = isDone(i) ? (topicColor(doneMap[i]) || 'var(--accent)') : '';
-    mini += `<i class="${isDone(i) ? 'on' : ''}" ${col ? `style="background:${col}"` : ''}></i>`;
-  }));
-  el.innerHTML = `<span>${foldState[key] ? '▾' : '▸'} ${label}</span> · <b>${done}/${total}</b><div class="mini">${mini}</div>`;
-  el.onclick = () => { foldState[key] = !foldState[key]; render(); };
+  el.innerHTML = `<span>${open ? '▾' : '▸'} ${hoursArr.length} empty hour${hoursArr.length > 1 ? 's' : ''}</span>` +
+    `<div class="mini" style="color:var(--faint);justify-content:flex-end">${from}–${to}</div>`;
+  el.onclick = () => { open ? expanded.delete(id) : expanded.add(id); render(); };
   return el;
 }
 
@@ -93,24 +93,27 @@ function render() {
   const cur = isToday();
   const nowHour = Math.floor(nowSlot() / 2);
 
-  if (collapse && cur) {
-    const pastHours = [], futureHours = [];
-    for (let h = 0; h < 24; h++) { if (h < nowHour) pastHours.push(h); else if (h > nowHour + 2) futureHours.push(h); }
-    if (pastHours.length) {
-      grid.appendChild(foldRow('Earlier today', pastHours, 'past'));
-      if (foldState.past) pastHours.forEach(h => grid.appendChild(hourRow(h)));
-    }
-    for (let h = nowHour; h <= Math.min(23, nowHour + 2); h++) grid.appendChild(hourRow(h));
-    if (futureHours.length) {
-      grid.appendChild(foldRow('Later today', futureHours, 'future'));
-      if (foldState.future) futureHours.forEach(h => grid.appendChild(hourRow(h)));
+  if (collapse) {
+    // Always show hours that have data (and the current hour today); fold runs of empty hours.
+    const isShown = h => hourHasData(h) || (cur && h === nowHour);
+    let h = 0;
+    while (h < 24) {
+      if (isShown(h)) { grid.appendChild(hourRow(h)); h++; continue; }
+      let j = h;
+      while (j < 24 && !isShown(j)) j++;
+      const hoursArr = [];
+      for (let k = h; k < j; k++) hoursArr.push(k);
+      const id = 'g' + h;
+      grid.appendChild(emptyFoldRow(hoursArr, id));
+      if (expanded.has(id)) hoursArr.forEach(k => grid.appendChild(hourRow(k)));
+      h = j;
     }
   } else {
     for (let h = 0; h < 24; h++) grid.appendChild(hourRow(h));
   }
 
   const n = doneCount();
-  document.getElementById('c-done').textContent = n;
+  document.getElementById('c-done').textContent = n / 2;   // slots -> hours (0.5h each)
   document.getElementById('meter').style.width = (n / TOTAL * 100) + '%';
   document.getElementById('pct').textContent = Math.round(n / TOTAL * 100) + '%';
   document.getElementById('date').textContent =
