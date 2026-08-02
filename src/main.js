@@ -59,6 +59,10 @@ app.on('window-all-closed', () => {
 ipcMain.handle('day:get', (_e, dateKey) => store.getDay(dateKey));
 ipcMain.handle('day:set', (_e, dateKey, slots) => { store.setDay(dateKey, slots); return true; });
 ipcMain.handle('data:all', () => store.getAll());
+ipcMain.handle('settings:get', () => store.getSettings());
+ipcMain.handle('settings:set', (_e, key, value) => { store.setSetting(key, value); return true; });
+ipcMain.handle('tasks:get', () => store.getTasks());
+ipcMain.handle('tasks:set', (_e, tasks) => { store.setTasks(tasks); return true; });
 
 // ---- IPC: window controls ----
 ipcMain.on('win:minimize', () => panel && panel.minimize());

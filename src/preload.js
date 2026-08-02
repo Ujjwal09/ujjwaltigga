@@ -5,6 +5,10 @@ contextBridge.exposeInMainWorld('tg', {
   getDay: (dateKey) => ipcRenderer.invoke('day:get', dateKey),
   setDay: (dateKey, slots) => ipcRenderer.invoke('day:set', dateKey, slots),
   getAll: () => ipcRenderer.invoke('data:all'),
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  setSetting: (key, value) => ipcRenderer.invoke('settings:set', key, value),
+  getTasks: () => ipcRenderer.invoke('tasks:get'),
+  setTasks: (tasks) => ipcRenderer.invoke('tasks:set', tasks),
   // window
   minimize: () => ipcRenderer.send('win:minimize'),
   close: () => ipcRenderer.send('win:close'),

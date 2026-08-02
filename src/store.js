@@ -1,13 +1,13 @@
 // Simple JSON-file store in Electron's userData dir.
-// Shape: { "YYYY-MM-DD": { "<slotIndex 0..47>": "topic" } }
-// A present slot key = "utilised"; its value is the topic ("" = no topic).
+// New shape: { days: { "YYYY-MM-DD": { "<slot>": "topic" } }, settings: {...}, tasks: [...] }
+// Old shape (auto-migrated): a flat { "YYYY-MM-DD": {...} } object of days.
 const fs = require('fs');
 const path = require('path');
 
 let filePath;
-let cache = {};
+let cache = { days: {}, settings: { target: 8 }, tasks: [] };
 
-// Back-compat: older data stored days as arrays of slot indexes.
+// Back-compat: older days stored as arrays of slot indexes.
 function normalizeDay(v) {
   if (Array.isArray(v)) {
     const o = {};
@@ -21,9 +21,17 @@ function init(userDataDir) {
   filePath = path.join(userDataDir, 'timegrid-data.json');
   try {
     const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    for (const k of Object.keys(raw)) cache[k] = normalizeDay(raw[k]);
+    if (raw && raw.days) {
+      // new format
+      for (const k of Object.keys(raw.days)) cache.days[k] = normalizeDay(raw.days[k]);
+      cache.settings = Object.assign({ target: 8 }, raw.settings || {});
+      cache.tasks = Array.isArray(raw.tasks) ? raw.tasks : [];
+    } else if (raw) {
+      // old flat format: every key is a date
+      for (const k of Object.keys(raw)) cache.days[k] = normalizeDay(raw[k]);
+    }
   } catch {
-    cache = {};
+    // keep defaults
   }
 }
 
@@ -32,18 +40,34 @@ function flush() {
 }
 
 function getDay(dateKey) {
-  return cache[dateKey] || {};
+  return cache.days[dateKey] || {};
 }
 
 function setDay(dateKey, slots) {
-  if (slots && Object.keys(slots).length) cache[dateKey] = slots;
-  else delete cache[dateKey];
+  if (slots && Object.keys(slots).length) cache.days[dateKey] = slots;
+  else delete cache.days[dateKey];
   flush();
 }
 
-// Everything, for the analytics dashboard.
+// All days, for the analytics dashboard.
 function getAll() {
-  return cache;
+  return cache.days;
 }
 
-module.exports = { init, getDay, setDay, getAll };
+function getSettings() {
+  return cache.settings;
+}
+function setSetting(key, value) {
+  cache.settings[key] = value;
+  flush();
+}
+
+function getTasks() {
+  return cache.tasks;
+}
+function setTasks(tasks) {
+  cache.tasks = tasks || [];
+  flush();
+}
+
+module.exports = { init, getDay, setDay, getAll, getSettings, setSetting, getTasks, setTasks };
