@@ -10,6 +10,7 @@ const expanded = new Set();        // ids of empty-hour groups the user expanded
 let doneMap = {};                 // { slotIndex: "topic" }  — presence = utilised
 let selected = null;              // currently selected slot index (for the learning box)
 let scrolled = false;
+let dailyTarget = 8;              // hours/day; footer % is measured against this
 
 const grid = document.getElementById('grid');
 const input = document.getElementById('learn');
@@ -113,9 +114,11 @@ function render() {
   }
 
   const n = doneCount();
-  document.getElementById('c-done').textContent = n / 2;   // slots -> hours (0.5h each)
+  const hours = n / 2;                                     // slots -> hours (0.5h each)
+  const targetPct = Math.round(hours / dailyTarget * 100); // footer % vs daily target
+  document.getElementById('c-done').textContent = hours;
   document.getElementById('meter').style.width = (n / TOTAL * 100) + '%';
-  document.getElementById('pct').textContent = Math.round(n / TOTAL * 100) + '%';
+  document.getElementById('pct').innerHTML = `${targetPct}% <span class="of">of ${dailyTarget}h</span>`;
   document.getElementById('date').textContent =
     viewDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   document.getElementById('todayTag').style.display = isToday() ? '' : 'none';
@@ -218,4 +221,14 @@ document.getElementById('statsBtn').onclick = () => window.tg.openDashboard();
 // keep "now" marker fresh; re-render every minute if viewing today
 setInterval(() => { if (isToday()) render(); }, 60 * 1000);
 
-(async () => { await load(); await refreshTopics(); loadBox(); render(); })();
+// pick up a target change made in the dashboard when the tracker is focused again
+window.addEventListener('focus', async () => {
+  const s = await window.tg.getSettings();
+  if (s && s.target && s.target !== dailyTarget) { dailyTarget = s.target; render(); }
+});
+
+(async () => {
+  const settings = await window.tg.getSettings();
+  if (settings && settings.target) dailyTarget = settings.target;
+  await load(); await refreshTopics(); loadBox(); render();
+})();

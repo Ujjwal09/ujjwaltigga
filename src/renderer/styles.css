@@ -99,3 +99,5 @@ body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiase
 .seg button.on{background:var(--accent-dim);color:var(--accent)}
 .link{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px}
 .link:hover{color:var(--accent)}
+#pct{font-variant-numeric:tabular-nums;color:var(--text)}
+#pct .of{color:var(--muted);margin-left:2px}

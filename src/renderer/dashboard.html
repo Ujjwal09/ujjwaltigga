@@ -12,7 +12,11 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding:28px 32px}
   h1{font-size:18px;font-weight:600;letter-spacing:.3px;margin-bottom:2px}
-  .sub{color:var(--muted);font-size:12px;margin-bottom:22px}
+  .sub{color:var(--muted);font-size:12px}
+  .ahead{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .iconbtn{width:34px;height:34px;flex:0 0 auto;border:1px solid var(--line);border-radius:9px;background:transparent;
+    color:var(--muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .14s}
+  .iconbtn:hover{border-color:var(--accent);color:var(--accent);background:rgba(94,234,212,0.16)}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
   .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
   .kpi .v{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -99,8 +103,13 @@
 </style>
 </head>
 <body>
-  <h1>Analytics</h1>
-  <div class="sub" id="sub">—</div>
+  <div class="ahead">
+    <button class="iconbtn" id="backBtn" title="Open time tracker">▦</button>
+    <div>
+      <h1>Analytics</h1>
+      <div class="sub" id="sub">—</div>
+    </div>
+  </div>
 
   <div class="targetbar">
     <span class="lbl">Daily target</span>

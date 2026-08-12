@@ -23,6 +23,13 @@ function createPanel() {
   });
   panel.setAlwaysOnTop(true, 'floating');
   panel.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  panel.on('closed', () => { panel = null; });
+}
+
+// Reopen the tracker if it was closed, otherwise just focus it.
+function showPanel() {
+  if (panel && !panel.isDestroyed()) { panel.show(); panel.focus(); }
+  else createPanel();
 }
 
 function openDashboard() {
@@ -69,6 +76,7 @@ ipcMain.on('win:minimize', () => panel && panel.minimize());
 ipcMain.on('win:close', () => panel && panel.close());
 ipcMain.on('win:toggleTop', (_e, on) => panel && panel.setAlwaysOnTop(on, 'floating'));
 ipcMain.on('win:dashboard', () => openDashboard());
+ipcMain.on('win:tracker', () => showPanel());
 ipcMain.on('win:resize', (_e, w, h) => {
   if (!panel) return;
   const [x, y] = panel.getPosition();

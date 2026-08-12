@@ -14,5 +14,6 @@ contextBridge.exposeInMainWorld('tg', {
   close: () => ipcRenderer.send('win:close'),
   toggleTop: (on) => ipcRenderer.send('win:toggleTop', on),
   openDashboard: () => ipcRenderer.send('win:dashboard'),
+  openTracker: () => ipcRenderer.send('win:tracker'),
   resize: (w, h) => ipcRenderer.send('win:resize', w, h),
 });

@@ -25,6 +25,8 @@ let goalsView = 'D';
 let goalDates = [];          // Date (midnight) per column, earliest..today
 let goalSeries = [];         // [{ name, color, cum: [] }]
 
+el('backBtn').onclick = () => window.tg.openTracker();
+
 (async () => {
   const all = await window.tg.getAll();
   const settings = await window.tg.getSettings();
