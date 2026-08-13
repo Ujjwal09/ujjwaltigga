@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('tg', {
   setSetting: (key, value) => ipcRenderer.invoke('settings:set', key, value),
   getTasks: () => ipcRenderer.invoke('tasks:get'),
   setTasks: (tasks) => ipcRenderer.invoke('tasks:set', tasks),
+  coach: () => ipcRenderer.invoke('coach:generate'),
   // window
   minimize: () => ipcRenderer.send('win:minimize'),
   close: () => ipcRenderer.send('win:close'),
