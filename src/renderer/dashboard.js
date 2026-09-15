@@ -99,9 +99,66 @@ el('backBtn').onclick = () => window.tg.openTracker();
   const tasks = await window.tg.getTasks();
   initTasks(tasks);
 
-  // ---- coach (static mock — not wired to Claude yet) ----
+  // ---- coach ----
   initCoach();
+
+  // ---- motivation (reels + notes) ----
+  await initMotivation();
 })();
+
+async function initMotivation() {
+  const m = await window.tg.getMotivation();
+  let reels = Array.isArray(m.reels) ? m.reels : [];
+  let notes = Array.isArray(m.notes) ? m.notes : [];
+  const fmt = ts => new Date(ts).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const shortcode = url => { const x = String(url).match(/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/); return x ? x[1] : null; };
+
+  // reels
+  const reelHost = el('reels');
+  function renderReels() {
+    reelHost.innerHTML = reels.map(code => `<div class="reel">
+      <button class="rm" data-code="${code}" title="Remove">✕</button>
+      <iframe src="https://www.instagram.com/reel/${code}/embed/" allowtransparency="true" allowfullscreen scrolling="no"></iframe>
+    </div>`).join('');
+    el('reelsEmpty').style.display = reels.length ? 'none' : '';
+    reelHost.querySelectorAll('.rm').forEach(b => b.onclick = () => {
+      reels = reels.filter(c => c !== b.dataset.code); window.tg.setReels(reels); renderReels();
+    });
+  }
+  el('addReel').onclick = () => {
+    const inp = el('reelUrl'); const code = shortcode(inp.value.trim());
+    if (!code) { inp.style.borderColor = 'var(--no)'; return; }
+    inp.style.borderColor = '';
+    if (!reels.includes(code)) reels = [code, ...reels];
+    inp.value = ''; window.tg.setReels(reels); renderReels();
+  };
+  el('reelUrl').addEventListener('keydown', e => { if (e.key === 'Enter') el('addReel').click(); });
+
+  // notes
+  const noteHost = el('notes');
+  function renderNotes() {
+    noteHost.innerHTML = notes.map(n => `<div class="note" data-id="${n.id}">
+      <textarea placeholder="Write a note…">${escapeHtml(n.text || '')}</textarea>
+      <div class="foot"><span class="when">${n.ts ? 'edited ' + fmt(n.ts) : ''}</span><button class="del">Delete</button></div>
+    </div>`).join('');
+    el('notesEmpty').style.display = notes.length ? 'none' : '';
+    noteHost.querySelectorAll('.note').forEach(row => {
+      const id = row.dataset.id, ta = row.querySelector('textarea');
+      ta.oninput = () => {
+        const n = notes.find(x => x.id === id); n.text = ta.value; n.ts = Date.now();
+        row.querySelector('.when').textContent = 'edited ' + fmt(n.ts); window.tg.setNotes(notes);
+      };
+      row.querySelector('.del').onclick = () => { notes = notes.filter(x => x.id !== id); window.tg.setNotes(notes); renderNotes(); };
+    });
+  }
+  el('addNote').onclick = () => {
+    notes = [{ id: Date.now() + '' + Math.random().toString(36).slice(2, 5), text: '', ts: Date.now() }, ...notes];
+    window.tg.setNotes(notes); renderNotes();
+    const first = noteHost.querySelector('.note textarea'); if (first) first.focus();
+  };
+
+  renderReels(); renderNotes();
+}
 
 function initCoach() {
   const host = el('coach');

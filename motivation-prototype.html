@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TimeGrid — Motivation preview</title>
+<style>
+  :root{
+    --bg:#14151a;--card:#1c1e25;--line:rgba(255,255,255,0.07);
+    --text:#e7e8ec;--muted:#8b8d98;--faint:#4a4c57;--accent:#5eead4;--accent-dim:rgba(94,234,212,0.16);
+    --no:#f0708a;
+    --font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding:28px 32px;max-width:900px;margin:0 auto}
+  h1{font-size:18px;font-weight:600;letter-spacing:.3px;margin-bottom:2px}
+  .sub{color:var(--muted);font-size:12px;margin-bottom:20px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px}
+  .card h2{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+  .card h2 .spacer{flex:1}
+
+  .addrow{display:flex;gap:8px;margin-bottom:14px}
+  .addrow input,.addrow textarea{flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);font-family:var(--font);font-size:13px;padding:8px 11px;outline:none;resize:vertical}
+  .addrow input:focus,.addrow textarea:focus{border-color:var(--accent)}
+  .btn{border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);border-radius:8px;
+    padding:0 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);white-space:nowrap}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .hint{color:var(--faint);font-size:12px;line-height:1.6}
+
+  /* reels grid */
+  .reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .reel{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
+  .reel iframe{width:100%;height:540px;border:0;display:block;background:#000}
+  .reel .rm{position:absolute;top:8px;right:8px;z-index:2;width:26px;height:26px;border:none;border-radius:7px;
+    background:rgba(10,11,15,0.85);color:#fff;cursor:pointer;font-size:14px;line-height:1}
+  .reel .rm:hover{background:var(--no)}
+  .reel.bad{display:flex;align-items:center;justify-content:center;height:120px;color:var(--faint);font-size:12px;text-align:center;padding:12px}
+  .empty{color:var(--faint);font-size:12px;padding:8px 0}
+
+  /* notes */
+  .note{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:rgba(255,255,255,0.02)}
+  .note textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:var(--font);font-size:13.5px;
+    line-height:1.55;outline:none;resize:vertical;min-height:44px}
+  .note .foot{display:flex;align-items:center;gap:10px;margin-top:6px}
+  .note .when{font-size:11px;color:var(--faint);flex:1}
+  .note .del{border:none;background:transparent;color:var(--faint);cursor:pointer;font-size:12px}
+  .note .del:hover{color:var(--no)}
+</style>
+</head>
+<body>
+  <h1>Motivation <span style="color:var(--faint);font-weight:400;font-size:13px">(browser preview)</span></h1>
+  <div class="sub">Save reels that keep you going and jot motivational notes. Persists in this browser for the preview.</div>
+
+  <div class="card">
+    <h2>REELS<span class="spacer"></span></h2>
+    <div class="addrow">
+      <input id="reelUrl" placeholder="Paste an Instagram reel URL (https://www.instagram.com/reel/…)" autocomplete="off">
+      <button class="btn" id="addReel">Add</button>
+    </div>
+    <div class="reels" id="reels"></div>
+    <div class="empty" id="reelsEmpty" style="display:none">No reels yet — paste a public reel URL above.</div>
+    <div class="hint" style="margin-top:12px">Reels play from Instagram (needs internet, public reels only). Autoplay-with-sound is blocked by the browser — click a reel to play.</div>
+  </div>
+
+  <div class="card">
+    <h2>NOTES<span class="spacer"></span><button class="btn sm" id="addNote">+ Note</button></h2>
+    <div id="notes"></div>
+    <div class="empty" id="notesEmpty" style="display:none">No notes yet — add one to get started.</div>
+  </div>
+
+<script>
+  /* ---------- reels ---------- */
+  const RKEY='timegrid:proto:reels';
+  let reels = JSON.parse(localStorage.getItem(RKEY) || '[]'); // array of shortcodes
+  const saveReels = ()=>localStorage.setItem(RKEY, JSON.stringify(reels));
+
+  function shortcode(url){
+    const m = String(url).match(/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
+    return m ? m[1] : null;
+  }
+  function renderReels(){
+    const host=document.getElementById('reels');
+    host.innerHTML = reels.map(code=>`
+      <div class="reel">
+        <button class="rm" data-code="${code}" title="Remove">✕</button>
+        <iframe src="https://www.instagram.com/reel/${code}/embed/" allowtransparency="true" allowfullscreen scrolling="no"></iframe>
+      </div>`).join('');
+    document.getElementById('reelsEmpty').style.display = reels.length ? 'none':'';
+    host.querySelectorAll('.rm').forEach(b=>b.onclick=()=>{ reels=reels.filter(c=>c!==b.dataset.code); saveReels(); renderReels(); });
+  }
+  document.getElementById('addReel').onclick=()=>{
+    const el=document.getElementById('reelUrl'); const code=shortcode(el.value.trim());
+    if(!code){ el.style.borderColor='var(--no)'; return; }
+    el.style.borderColor='';
+    if(!reels.includes(code)) reels.unshift(code);
+    el.value=''; saveReels(); renderReels();
+  };
+  document.getElementById('reelUrl').addEventListener('keydown',e=>{ if(e.key==='Enter')document.getElementById('addReel').click(); });
+
+  /* ---------- notes ---------- */
+  const NKEY='timegrid:proto:notes';
+  let notes = JSON.parse(localStorage.getItem(NKEY) || '[]'); // {id, text, ts}
+  const saveNotes = ()=>localStorage.setItem(NKEY, JSON.stringify(notes));
+  const fmt = ts => new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+
+  function renderNotes(){
+    const host=document.getElementById('notes');
+    host.innerHTML = notes.map(n=>`
+      <div class="note" data-id="${n.id}">
+        <textarea placeholder="Write a note…">${(n.text||'').replace(/</g,'&lt;')}</textarea>
+        <div class="foot"><span class="when">${n.ts?('edited '+fmt(n.ts)):''}</span><button class="del">Delete</button></div>
+      </div>`).join('');
+    document.getElementById('notesEmpty').style.display = notes.length ? 'none':'';
+    host.querySelectorAll('.note').forEach(el=>{
+      const id=el.dataset.id, ta=el.querySelector('textarea');
+      ta.oninput=()=>{ const n=notes.find(x=>x.id===id); n.text=ta.value; n.ts=Date.now();
+        el.querySelector('.when').textContent='edited '+fmt(n.ts); saveNotes(); };
+      el.querySelector('.del').onclick=()=>{ notes=notes.filter(x=>x.id!==id); saveNotes(); renderNotes(); };
+    });
+  }
+  document.getElementById('addNote').onclick=()=>{
+    notes.unshift({id:Date.now()+''+Math.random().toString(36).slice(2,5), text:'', ts:Date.now()});
+    saveNotes(); renderNotes();
+    const first=document.querySelector('.note textarea'); if(first) first.focus();
+  };
+
+  renderReels(); renderNotes();
+</script>
+</body>
+</html>

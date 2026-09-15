@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld('tg', {
   getTasks: () => ipcRenderer.invoke('tasks:get'),
   setTasks: (tasks) => ipcRenderer.invoke('tasks:set', tasks),
   coach: () => ipcRenderer.invoke('coach:generate'),
+  getMotivation: () => ipcRenderer.invoke('motivation:get'),
+  setReels: (reels) => ipcRenderer.invoke('reels:set', reels),
+  setNotes: (notes) => ipcRenderer.invoke('notes:set', notes),
   // window
   minimize: () => ipcRenderer.send('win:minimize'),
   close: () => ipcRenderer.send('win:close'),

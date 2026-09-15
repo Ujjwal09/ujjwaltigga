@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 let filePath;
-let cache = { days: {}, settings: { target: 8 }, tasks: [] };
+let cache = { days: {}, settings: { target: 8 }, tasks: [], motivation: { reels: [], notes: [] } };
 
 // Back-compat: older days stored as arrays of slot indexes.
 function normalizeDay(v) {
@@ -26,6 +26,10 @@ function init(userDataDir) {
       for (const k of Object.keys(raw.days)) cache.days[k] = normalizeDay(raw.days[k]);
       cache.settings = Object.assign({ target: 8 }, raw.settings || {});
       cache.tasks = Array.isArray(raw.tasks) ? raw.tasks : [];
+      cache.motivation = {
+        reels: Array.isArray(raw.motivation && raw.motivation.reels) ? raw.motivation.reels : [],
+        notes: Array.isArray(raw.motivation && raw.motivation.notes) ? raw.motivation.notes : [],
+      };
     } else if (raw) {
       // old flat format: every key is a date
       for (const k of Object.keys(raw)) cache.days[k] = normalizeDay(raw[k]);
@@ -70,4 +74,16 @@ function setTasks(tasks) {
   flush();
 }
 
-module.exports = { init, getDay, setDay, getAll, getSettings, setSetting, getTasks, setTasks };
+function getMotivation() {
+  return cache.motivation;
+}
+function setReels(reels) {
+  cache.motivation.reels = reels || [];
+  flush();
+}
+function setNotes(notes) {
+  cache.motivation.notes = notes || [];
+  flush();
+}
+
+module.exports = { init, getDay, setDay, getAll, getSettings, setSetting, getTasks, setTasks, getMotivation, setReels, setNotes };

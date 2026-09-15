@@ -33,8 +33,9 @@ Reachable via **Analytics ↗** in the tracker; a **▦** button in the Analytic
 - **Daily utilisation** — 30-day bar trend with absolute hours labeled.
 - **Hour-of-day pattern** and a **5-week consistency heatmap**.
 - **Your Coach** *(optional, needs an OpenAI key — see below)* — generates a motivational read of your learning curve and concrete areas to improve, grounded strictly in your tracked data.
+- **Motivation** — save **Instagram reels** (paste a public reel URL; it embeds Instagram's player — needs internet, public reels only) and keep an editable list of **notes**. Both persist locally.
 
-All charts are hand-drawn SVG — no external/CDN chart dependencies.
+All charts are hand-drawn SVG — no external/CDN chart dependencies. (The reels feature is the one exception: it embeds Instagram's own player from the web.)
 
 ## AI Coach setup (optional)
 
@@ -76,11 +77,12 @@ prototype.html            Tracker design mockup (browser)
 analytics-prototype.html  Analytics design mockup (browser)
 nav-prototype.html        Back-button / target-% mockup (browser)
 coach-prototype.html      Coach card mockup (browser)
+motivation-prototype.html Reels + notes mockup (browser)
 ```
 
 ## Storage
 
 Plain JSON at `~/Library/Application Support/timegrid/timegrid-data.json`, shaped as
-`{ "days": { "YYYY-MM-DD": { "<slot 0..47>": "topic" } }, "settings": { "target": 8 }, "tasks": [...] }`.
+`{ "days": { "YYYY-MM-DD": { "<slot 0..47>": "topic" } }, "settings": { "target": 8 }, "tasks": [...], "motivation": { "reels": [...], "notes": [...] } }`.
 Old flat `{ "YYYY-MM-DD": [...] }` files auto-migrate on load. Chosen over SQLite to stay
 dependency-free and avoid native builds against Electron's ABI.

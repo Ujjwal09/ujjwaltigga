@@ -71,6 +71,9 @@ ipcMain.handle('settings:set', (_e, key, value) => { store.setSetting(key, value
 ipcMain.handle('tasks:get', () => store.getTasks());
 ipcMain.handle('tasks:set', (_e, tasks) => { store.setTasks(tasks); return true; });
 ipcMain.handle('coach:generate', () => generateCoach());
+ipcMain.handle('motivation:get', () => store.getMotivation());
+ipcMain.handle('reels:set', (_e, reels) => { store.setReels(reels); return true; });
+ipcMain.handle('notes:set', (_e, notes) => { store.setNotes(notes); return true; });
 
 // ---- Coach: summarise real tracked data with Claude ----
 const pad2 = n => String(n).padStart(2, '0');
