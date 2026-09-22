@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 let filePath;
-let cache = { days: {}, settings: { target: 8 }, tasks: [], motivation: { reels: [], notes: [] } };
+let cache = { days: {}, plans: {}, catMap: {}, settings: { target: 8 }, tasks: [], motivation: { reels: [], notes: [] } };
 
 // Back-compat: older days stored as arrays of slot indexes.
 function normalizeDay(v) {
@@ -24,6 +24,8 @@ function init(userDataDir) {
     if (raw && raw.days) {
       // new format
       for (const k of Object.keys(raw.days)) cache.days[k] = normalizeDay(raw.days[k]);
+      cache.plans = (raw.plans && typeof raw.plans === 'object') ? raw.plans : {};
+      cache.catMap = (raw.catMap && typeof raw.catMap === 'object') ? raw.catMap : {};
       cache.settings = Object.assign({ target: 8 }, raw.settings || {});
       cache.tasks = Array.isArray(raw.tasks) ? raw.tasks : [];
       cache.motivation = {
@@ -58,6 +60,25 @@ function getAll() {
   return cache.days;
 }
 
+// Planned (intended) slots per day — separate from actual done slots.
+function getPlan(dateKey) {
+  return cache.plans[dateKey] || {};
+}
+function setPlan(dateKey, slots) {
+  if (slots && Object.keys(slots).length) cache.plans[dateKey] = slots;
+  else delete cache.plans[dateKey];
+  flush();
+}
+
+// Remembered topic -> category mapping (for rolling specific topics up to categories).
+function getCatMap() {
+  return cache.catMap;
+}
+function setCatMap(map) {
+  cache.catMap = map || {};
+  flush();
+}
+
 function getSettings() {
   return cache.settings;
 }
@@ -86,4 +107,4 @@ function setNotes(notes) {
   flush();
 }
 
-module.exports = { init, getDay, setDay, getAll, getSettings, setSetting, getTasks, setTasks, getMotivation, setReels, setNotes };
+module.exports = { init, getDay, setDay, getAll, getPlan, setPlan, getCatMap, setCatMap, getSettings, setSetting, getTasks, setTasks, getMotivation, setReels, setNotes };

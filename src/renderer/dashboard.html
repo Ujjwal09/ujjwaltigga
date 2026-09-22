@@ -100,25 +100,10 @@
   .ticks{position:relative;height:14px;margin-top:3px}
   .ticks span{position:absolute;transform:translateX(-50%);font-size:9px;color:var(--faint);font-variant-numeric:tabular-nums}
   .ticks span.hit{color:var(--accent)}
-  /* coach */
   .btn{border:1px solid var(--accent);background:rgba(94,234,212,0.16);color:var(--accent);border-radius:8px;
     padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
   .btn:disabled{opacity:.5;cursor:default}
-  .coach .headline{font-size:16px;font-weight:600;margin-bottom:6px}
-  .coach .stats{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
-  .coach .stats b{color:var(--accent)}
-  .coach h3{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:14px 0 6px}
-  .coach p{font-size:13.5px;line-height:1.6;color:var(--text)}
-  .coach .actions{margin:8px 0 0;padding-left:0;list-style:none}
-  .coach .actions li{font-size:13.5px;line-height:1.55;margin-bottom:8px;padding-left:22px;position:relative}
-  .coach .actions li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
-  .coach .bottom{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.6}
-  .coach .cmeta{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:11px;color:var(--faint)}
-  .coach .cmeta .d{width:5px;height:5px;border-radius:50%;background:var(--faint)}
-  .coach .hint{color:var(--faint);font-size:12px;line-height:1.6}
-  .loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;padding:12px 0}
-  .spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+  .hint{color:var(--faint);font-size:12px;line-height:1.6}
   /* motivation */
   .reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
   .reel{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
@@ -153,7 +138,7 @@
   <div class="kpis" id="kpis"></div>
 
   <div class="card">
-    <h2>TOPIC GOALS — HOURS TOWARD 10 · 24 · 50 · 100</h2>
+    <h2>CATEGORY GOALS — HOURS TOWARD 10 · 24 · 50 · 100</h2>
     <div id="goals"></div>
   </div>
 
@@ -192,30 +177,16 @@
     <div id="trend"></div>
   </div>
 
-  <div class="row2">
-    <div class="card">
-      <h2>HOUR-OF-DAY PATTERN — WHEN YOU'RE MOST ACCOUNTABLE</h2>
-      <div id="hours"></div>
-    </div>
-    <div class="card">
-      <h2>CONSISTENCY — LAST 5 WEEKS</h2>
-      <div id="heat"></div>
-      <div class="legend">less
-        <span class="cell" style="background:rgba(94,234,212,0.12)"></span>
-        <span class="cell" style="background:rgba(94,234,212,0.38)"></span>
-        <span class="cell" style="background:rgba(94,234,212,0.66)"></span>
-        <span class="cell" style="background:rgba(94,234,212,1)"></span>
-        more
-      </div>
-    </div>
-  </div>
-
   <div class="card">
-    <h2>YOUR COACH
-      <span class="spacer"></span>
-      <button class="btn" id="coachBtn">✨ Generate summary</button>
-    </h2>
-    <div id="coach"></div>
+    <h2>CONSISTENCY — LAST 5 WEEKS</h2>
+    <div id="heat"></div>
+    <div class="legend">less
+      <span class="cell" style="background:rgba(94,234,212,0.12)"></span>
+      <span class="cell" style="background:rgba(94,234,212,0.38)"></span>
+      <span class="cell" style="background:rgba(94,234,212,0.66)"></span>
+      <span class="cell" style="background:rgba(94,234,212,1)"></span>
+      more
+    </div>
   </div>
 
   <div class="card">

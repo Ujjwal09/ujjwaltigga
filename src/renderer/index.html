@@ -23,15 +23,25 @@
     <div class="meter"><i id="meter"></i></div>
     <div class="learnbox">
       <div class="cap">
-        <span class="lbl">Learning</span>
+        <span class="lbl" id="boxLbl">Learning</span>
         <span class="slot none" id="selLabel">— select a cell —</span>
+        <span class="spacer"></span>
+        <div class="seg" id="modeSeg">
+          <button data-m="track" class="on" id="mTrack">Track</button>
+          <button data-m="plan" id="mPlan">Plan</button>
+        </div>
       </div>
       <div class="learnrow">
-        <input id="learn" list="topics" placeholder="Please enter a Topic" autocomplete="off" spellcheck="false" disabled>
-        <datalist id="topics"></datalist>
+        <span class="swatch" id="swatch"></span>
+        <input id="cat" list="cats" placeholder="Category (e.g. DSA)" autocomplete="off" spellcheck="false" disabled>
+      </div>
+      <div class="learnrow">
+        <input id="learn" list="topics" placeholder="Specific topic (optional)" autocomplete="off" spellcheck="false" disabled>
         <button class="act no" id="cancel" title="Cancel change">✗</button>
         <button class="act ok" id="confirm" title="Confirm change">✓</button>
       </div>
+      <datalist id="cats"></datalist>
+      <datalist id="topics"></datalist>
     </div>
     <div class="grid" id="grid"></div>
     <div class="tools">
@@ -40,6 +50,7 @@
         <button data-v="1">Collapse</button>
       </div>
       <span class="spacer"></span>
+      <span id="planct" class="planct"></span>
       <button class="link" id="statsBtn">Analytics ↗</button>
       <span id="pct">0%</span>
     </div>

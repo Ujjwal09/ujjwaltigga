@@ -60,6 +60,12 @@ body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiase
 .act.show{opacity:1;transform:scale(1);pointer-events:auto}
 .act.no:hover{border-color:var(--no);color:var(--no);background:rgba(240,112,138,0.12)}
 .act.ok:hover{border-color:var(--ok);color:var(--ok);background:var(--accent-dim)}
+.learnbox .cap .spacer{flex:1}
+.learnbox .cap .lbl.plan{color:#f0c274}
+.learnrow + .learnrow{margin-top:6px}
+.swatch{width:10px;height:10px;border-radius:3px;flex:0 0 auto;background:var(--faint)}
+#modeSeg button.on.planon{background:rgba(240,194,116,0.16);color:#f0c274}
+#modeSeg button:disabled{opacity:.35;cursor:default}
 
 .grid{flex:0 1 auto;max-height:560px;overflow-y:auto;padding:6px 0}
 .grid::-webkit-scrollbar{width:6px}
@@ -81,6 +87,9 @@ body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiase
 .cell.done::before{content:"";width:4px;height:8px;border:solid #0f1114;border-width:0 2px 2px 0;transform:rotate(45deg);margin-bottom:2px}
 .cell.tagged::after{content:"";position:absolute;top:2px;right:2px;width:4px;height:4px;border-radius:50%;background:#0f1114;opacity:.55}
 .cell.sel{outline:2px solid #fff;outline-offset:1px}
+/* planned (intended, not yet done): dashed ghost in the category colour */
+.cell.planned:not(.done){border-style:dashed;background:transparent}
+.cell.planned:not(.done)::before{content:"";width:4px;height:4px;border:0;border-radius:50%;background:currentColor;opacity:.9}
 .cell.nowcell{border-color:var(--accent);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--accent-dim)}50%{box-shadow:0 0 0 4px transparent}}
 
@@ -101,3 +110,5 @@ body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiase
 .link:hover{color:var(--accent)}
 #pct{font-variant-numeric:tabular-nums;color:var(--text)}
 #pct .of{color:var(--muted);margin-left:2px}
+.planct{color:#f0c274;font-variant-numeric:tabular-nums}
+.today-tag.future{color:#f0c274;border-color:rgba(240,194,116,0.35)}
